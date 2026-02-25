@@ -1,4 +1,4 @@
-# TalaStock - Technical Stack 🚀
+# TalaStock - Technical Stack
 
 TalaStock is built using a modern, scalable, and high-performance technology stack designed for cross-platform efficiency and premium aesthetics.
 

@@ -1,4 +1,4 @@
-# TalaStock - Features & Functionalities 📦
+# TalaStock - Features & Functionalities
 
 A comprehensive overview of what TalaStock can do.
 

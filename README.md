@@ -1,8 +1,8 @@
-# TalaStock - Premium Inventory Management System 📦
+# TalaStock - Premium Inventory Management System
 
 TalaStock is a state-of-the-art, cross-platform inventory management ecosystem. Built with a focus on speed, premium aesthetics, and robust security, it provides businesses with real-time insights into their stock levels, user activities, and financial trends.
 
-## 🌟 Key Features
+## Key Features
 - **Cross-Platform**: Seamless experience across **Web** and **Native Desktop (Electron)**.
 - **Dynamic Theming**: Instant **Dark / Light Mode** switching with a premium toggle.
 - **Advanced Analytics**: Visual inventory history and trends using `recharts`.
@@ -11,7 +11,7 @@ TalaStock is a state-of-the-art, cross-platform inventory management ecosystem. 
 - **Premium UX**: High-performance **Glassmorphism UI** with smooth transitions.
 - **Robust Security**: JWT-based authentication with BCrypt password encryption.
 
-## 🏗️ System Architecture
+## System Architecture
 ```mermaid
 graph TD
     User((User))
@@ -39,12 +39,12 @@ graph TD
     DB --> Trig
 ```
 
-## 📚 Documentation
+## Documentation
 For detailed information, please refer to:
 - [**Technical Stack**](./TECH_STACK.md) - Deep dive into the technologies used.
 - [**Features Guide**](./FEATURES.md) - Comprehensive walk-through of the app's capabilities.
 
-## ⚡ Quick Start
+## Quick Start
 
 ### 1. Database Setup
 Execute the script located at `/Database/schema.sql` to initialize your MySQL database, audit triggers, and seed data.
@@ -64,7 +64,7 @@ npm run dev
 ```
 *Note: The Desktop launcher automatically starts the Vite dev server for you.*
 
-## 💎 Performance & Polish
+## Performance & Polish
 - **Optimized Rendering**: Leverages React `useMemo` for heavy data filtering and statistical calculations.
 - **High-Density UI**: A compact design system that allows professional users to monitor more data at a glance.
 - **ADO.Net Performance**: Direct database mapping for maximum throughput.
