@@ -1,0 +1,27 @@
+# .NET
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+appsettings.Development.json
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+.eslintcache
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Electron
+out/
+release/
+
+# Build
+*.log

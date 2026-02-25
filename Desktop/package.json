@@ -1,0 +1,29 @@
+{
+  "name": "talastock-desktop",
+  "version": "1.0.0",
+  "description": "TalaStock Desktop Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"npm run dev --prefix ../Frontend\" \"wait-on http://localhost:5173 && electron .\"",
+    "build": "npm run build --prefix ../Frontend && electron-builder"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^34.2.0",
+    "electron-builder": "^24.13.3",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.talastock.app",
+    "productName": "TalaStock",
+    "files": [
+      "main.js",
+      "preload.js",
+      "../Frontend/dist/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    }
+  }
+}
