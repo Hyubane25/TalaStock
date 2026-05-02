@@ -37,12 +37,8 @@ A comprehensive overview of what TalaStock can do.
 - **Sleek Toggle Switch**: Premium sidebar control for instant skin switching.
 - **Unified Aesthetics**: Consistent colors across tables, charts, and modals in both modes.
 
-## 6. User Experience (UX) & Desktop Integration
+## 6. User Experience (UX)
 - **Glassmorphism Design**: Modern, sleek interface with blur effects and gradients.
-- **Native Desktop Integration**: 
-    - Custom Electron title bar with high-clearance drag regions.
-    - Native macOS window control integration (no overlap with UI).
-    - Draggable window environment.
 - **Compact Data View**: High-density table system for professional inventory monitoring.
 - **Performance Optimized**: Zero-lag interaction using `useMemo` and direct ADO.Net mapping.
 - **Clean Interface**: Hidden number spinners and custom-styled scrollbars.

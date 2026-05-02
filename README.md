@@ -3,11 +3,10 @@
 TalaStock is a state-of-the-art, cross-platform inventory management ecosystem. Built with a focus on speed, premium aesthetics, and robust security, it provides businesses with real-time insights into their stock levels, user activities, and financial trends.
 
 ## Key Features
-- **Cross-Platform**: Seamless experience across **Web** and **Native Desktop (Electron)**.
+- **Web-Based**: Modern web application accessible from any browser.
 - **Dynamic Theming**: Instant **Dark / Light Mode** switching with a premium toggle.
 - **Advanced Analytics**: Visual inventory history and trends using `recharts`.
 - **Global Management**: Manage **Users**, **Categories**, and **Currencies** (multi-currency support) from a central administrative panel.
-- **Native Desktop Polish**: Optimized for macOS with integrated window controls and custom drag regions.
 - **Premium UX**: High-performance **Glassmorphism UI** with smooth transitions.
 - **Robust Security**: JWT-based authentication with BCrypt password encryption.
 
@@ -17,7 +16,6 @@ graph TD
     User((User))
     subgraph "Client Layer"
         Web[React Web App]
-        Desktop[Electron Desktop App]
     end
     subgraph "API Layer"
         Backend[ASP.NET Core API]
@@ -30,9 +28,7 @@ graph TD
     end
 
     User --> Web
-    User --> Desktop
     Web --> Backend
-    Desktop --> Backend
     Backend --> Auth
     Backend --> Theme
     Backend --> DB
@@ -56,18 +52,17 @@ dotnet run
 ```
 *Port: http://localhost:5223 (Admin Authorized)*
 
-### 3. Desktop / Web App
+### 3. Web App
 ```bash
-cd Desktop
+cd Frontend
 npm install
 npm run dev
 ```
-*Note: The Desktop launcher automatically starts the Vite dev server for you.*
 
 ## Performance & Polish
 - **Optimized Rendering**: Leverages React `useMemo` for heavy data filtering and statistical calculations.
 - **High-Density UI**: A compact design system that allows professional users to monitor more data at a glance.
 - **ADO.Net Performance**: Direct database mapping for maximum throughput.
-- **Custom UI Tweaks**: Custom scrollbar system and window region management for a truly native feel.
+- **Custom UI Tweaks**: Custom scrollbar system for a polished feel.
 
 ---

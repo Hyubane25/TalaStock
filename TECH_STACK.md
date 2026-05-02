@@ -23,18 +23,10 @@ TalaStock is built using a modern, scalable, and high-performance technology sta
 - **Hooks**: Strategic use of `useMemo` and `useCallback` for optimized rendering.
 - **Icons**: Lucide React.
 - **Charts**: Recharts (High-performance SVG charts).
-- **API Client**: Axios with interceptors for token injection and 401 handling.
+- **API Client**: Native Fetch API with custom wrapper for token injection and 401 handling.
 - **Routing**: React Router DOM v6.
-
-## Desktop (Native Wrapper)
-- **Framework**: Electron.js
-- **UI Customization**: 
-    - `titleBarStyle: 'hiddenInset'` for custom macOS button integration.
-    - `-webkit-app-region: drag` for custom window movement logic.
-- **Bridge**: Context Bridge for secure Node.js access.
-- **Packaging**: Electron Builder.
 
 ## DevOps & Tools
 - **Version Control**: Git
-- **Package Managers**: NuGet (Backend), NPM (Frontend/Desktop)
+- **Package Managers**: NuGet (Backend), NPM (Frontend)
 - **Environment**: Visual Studio Code / Visual Studio

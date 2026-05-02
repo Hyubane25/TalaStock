@@ -1,40 +1,55 @@
-import axios from 'axios';
+const BASE_URL = 'http://localhost:5223/api'; // Adjust port if needed
 
-const api = axios.create({
-  baseURL: 'http://localhost:5223/api', // Adjust port if needed
-});
-
-api.interceptors.request.use((config) => {
+// Helper function to make fetch requests with auth token
+async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/';
-    }
-    return Promise.reject(error);
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
-);
+
+  const config = {
+    ...options,
+    headers,
+  };
+
+  const response = await fetch(`${BASE_URL}${endpoint}`, config);
+
+  // Handle 401 unauthorized
+  if (response.status === 401) {
+    localStorage.removeItem('token');
+    window.location.href = '/';
+  }
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}
 
 
 export const authService = {
   login: async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
+    const data = await apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    if (data.token) {
+      localStorage.setItem('token', data.token);
     }
-    return response.data;
+    return data;
   },
   register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+    return await apiRequest('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
   },
   logout: () => {
     localStorage.removeItem('token');
@@ -44,48 +59,67 @@ export const authService = {
 
 export const itemService = {
   getAll: async () => {
-    const response = await api.get('/items');
-    return response.data;
+    return await apiRequest('/items', { method: 'GET' });
   },
   getById: async (id) => {
-    const response = await api.get(`/items/${id}`);
-    return response.data;
+    return await apiRequest(`/items/${id}`, { method: 'GET' });
   },
   create: async (item) => {
-    const response = await api.post('/items', item);
-    return response.data;
+    return await apiRequest('/items', {
+      method: 'POST',
+      body: JSON.stringify(item),
+    });
   },
   update: async (id, item) => {
-    const response = await api.put(`/items/${id}`, item);
-    return response.data;
+    return await apiRequest(`/items/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(item),
+    });
   },
   delete: async (id) => {
-    const response = await api.delete(`/items/${id}`);
-    return response.data;
+    return await apiRequest(`/items/${id}`, { method: 'DELETE' });
   },
 };
 
 export const adminService = {
-  getUsers: async () => (await api.get('/admin/users')).data,
-  createUser: async (user) => (await api.post('/admin/users', user)).data,
-  updateUserRole: async (userId, roleId) => (await api.put(`/admin/users/${userId}/role`, { roleId })).data,
-  deleteUser: async (userId) => (await api.delete(`/admin/users/${userId}`)).data,
-  getRoles: async () => (await api.get('/admin/roles')).data,
-  getCurrencies: async () => (await api.get('/admin/currencies')).data,
-  addCurrency: async (currency) => (await api.post('/admin/currencies', currency)).data,
-  updateCurrency: async (id, currency) => (await api.put(`/admin/currencies/${id}`, currency)).data,
-  deleteCurrency: async (id) => (await api.delete(`/admin/currencies/${id}`)).data,
-  setDefaultCurrency: async (id) => (await api.post(`/admin/currencies/${id}/default`)).data,
-  getAnalytics: async (period) => (await api.get(`/admin/analytics?period=${period}`)).data,
-  getCategories: async () => (await api.get('/admin/categories')).data,
-  addCategory: async (category) => (await api.post('/admin/categories', category)).data,
-  updateCategory: async (id, category) => (await api.put(`/admin/categories/${id}`, category)).data,
-  deleteCategory: async (id) => (await api.delete(`/admin/categories/${id}`)).data,
+  getUsers: async () => await apiRequest('/admin/users', { method: 'GET' }),
+  createUser: async (user) => await apiRequest('/admin/users', {
+    method: 'POST',
+      body: JSON.stringify(user),
+    }),
+  updateUserRole: async (userId, roleId) => await apiRequest(`/admin/users/${userId}/role`, {
+    method: 'PUT',
+    body: JSON.stringify({ roleId }),
+  }),
+  deleteUser: async (userId) => await apiRequest(`/admin/users/${userId}`, { method: 'DELETE' }),
+  getRoles: async () => await apiRequest('/admin/roles', { method: 'GET' }),
+  getCurrencies: async () => await apiRequest('/admin/currencies', { method: 'GET' }),
+  addCurrency: async (currency) => await apiRequest('/admin/currencies', {
+    method: 'POST',
+    body: JSON.stringify(currency),
+  }),
+  updateCurrency: async (id, currency) => await apiRequest(`/admin/currencies/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(currency),
+  }),
+  deleteCurrency: async (id) => await apiRequest(`/admin/currencies/${id}`, { method: 'DELETE' }),
+  setDefaultCurrency: async (id) => await apiRequest(`/admin/currencies/${id}/default`, {
+    method: 'POST',
+  }),
+  getAnalytics: async (period) => await apiRequest(`/admin/analytics?period=${period}`, { method: 'GET' }),
+  getCategories: async () => await apiRequest('/admin/categories', { method: 'GET' }),
+  addCategory: async (category) => await apiRequest('/admin/categories', {
+    method: 'POST',
+    body: JSON.stringify(category),
+  }),
+  updateCategory: async (id, category) => await apiRequest(`/admin/categories/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(category),
+  }),
+  deleteCategory: async (id) => await apiRequest(`/admin/categories/${id}`, { method: 'DELETE' }),
 };
 
 export const systemService = {
-  getDefaultCurrency: async () => (await api.get('/system/currency/default')).data,
-  getCategories: async () => (await api.get('/system/categories')).data,
+  getDefaultCurrency: async () => await apiRequest('/system/currency/default', { method: 'GET' }),
+  getCategories: async () => await apiRequest('/system/categories', { method: 'GET' }),
 };
-
-export default api;
