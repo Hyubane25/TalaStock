@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TalaStock.Backend.Models;
 using TalaStock.Backend.Repositories;
@@ -7,7 +6,6 @@ namespace TalaStock.Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class ItemsController : ControllerBase
     {
         private readonly IItemRepository _itemRepository;
@@ -33,7 +31,6 @@ namespace TalaStock.Backend.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] Item item)
         {
             var id = await _itemRepository.CreateItemAsync(item);
@@ -42,7 +39,6 @@ namespace TalaStock.Backend.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] Item item)
         {
             if (id != item.ItemId) return BadRequest();
@@ -52,7 +48,6 @@ namespace TalaStock.Backend.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _itemRepository.DeleteItemAsync(id);

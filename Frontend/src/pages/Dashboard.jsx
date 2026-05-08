@@ -40,15 +40,19 @@ const Dashboard = () => {
             setCurrency(data);
         } catch (err) {
             console.error('Failed to fetch currency', err);
+            // Fallback to default USD
+            setCurrency({ symbol: '$', code: 'USD' });
         }
     };
 
     const fetchAnalytics = async () => {
         try {
-            const data = await adminService.getAnalytics(period);
+            const data = await systemService.getAnalytics(period);
             setAnalytics(data);
         } catch (err) {
             console.error('Failed to fetch analytics', err);
+            // Set empty analytics to prevent crashes
+            setAnalytics({ timeline: [], categoryBreakdown: [] });
         }
     };
 
@@ -58,6 +62,8 @@ const Dashboard = () => {
             setItems(data);
         } catch (err) {
             console.error('Failed to fetch items', err);
+            // Set empty items array to prevent crashes
+            setItems([]);
         } finally {
             setLoading(false);
         }

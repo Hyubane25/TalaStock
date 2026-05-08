@@ -58,6 +58,8 @@ const ManagementPage = () => {
         try {
             if (type === 'create_user') {
                 await adminService.createUser(data);
+            } else if (type === 'edit_user') {
+                await adminService.updateUser(data.userId, { username: data.username, email: data.email });
             } else if (type === 'add_category') {
                 await adminService.addCategory(data);
             } else if (type === 'edit_category') {
@@ -89,10 +91,18 @@ const ManagementPage = () => {
 
     const handleRoleUpdate = async (userId, roleId) => {
         try {
-            await adminService.updateUserRole(userId, roleId);
+            console.log(`Updating role for user ${userId} to role ${roleId}`);
+            const response = await adminService.updateUserRole(userId, roleId);
+            console.log('Role update response:', response);
             await fetchAllData();
         } catch (err) {
-            alert('Failed to update role');
+            console.error('Role update error details:', {
+                message: err.message,
+                status: err.response?.status,
+                data: err.response?.data,
+                stack: err.stack
+            });
+            alert(`Failed to update role: ${err.response?.data?.message || err.message || 'Server error'}`);
         }
     };
 
@@ -186,7 +196,19 @@ const ManagementPage = () => {
                                                             </select>
                                                         </td>
                                                         <td style={{ padding: '10px 24px' }}>
-                                                            <button onClick={() => handleDelete('user', user.userId)} style={{ color: 'var(--danger)', background: 'none' }}><Trash2 size={16} /></button>
+                                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                                <button 
+                                                                    onClick={() => openModal('edit_user', 'Edit User', { 
+                                                                        userId: user.userId, 
+                                                                        username: user.username, 
+                                                                        email: user.email 
+                                                                    })} 
+                                                                    style={{ color: 'var(--text-muted)', background: 'none' }}
+                                                                >
+                                                                    <Edit size={16} />
+                                                                </button>
+                                                                <button onClick={() => handleDelete('user', user.userId)} style={{ color: 'var(--danger)', background: 'none' }}><Trash2 size={16} /></button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -269,7 +291,7 @@ const ManagementPage = () => {
 
             <Modal isOpen={modalConfig.isOpen} onClose={closeModal} title={modalConfig.title}>
                 <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {modalConfig.type === 'create_user' && (
+                    {(modalConfig.type === 'create_user' || modalConfig.type === 'edit_user') && (
                         <>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Username</label>
@@ -289,24 +311,28 @@ const ManagementPage = () => {
                                     onChange={e => setModalConfig({ ...modalConfig, data: { ...modalConfig.data, email: e.target.value } })}
                                 />
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={modalConfig.data.password || ''}
-                                    onChange={e => setModalConfig({ ...modalConfig, data: { ...modalConfig.data, password: e.target.value } })}
-                                />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Initial Role</label>
-                                <select
-                                    value={modalConfig.data.roleId || ''}
-                                    onChange={e => setModalConfig({ ...modalConfig, data: { ...modalConfig.data, roleId: parseInt(e.target.value) } })}
-                                >
-                                    {roles.map(r => <option key={r.roleId} value={r.roleId}>{r.roleName}</option>)}
-                                </select>
-                            </div>
+                            {modalConfig.type === 'create_user' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Password</label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={modalConfig.data.password || ''}
+                                        onChange={e => setModalConfig({ ...modalConfig, data: { ...modalConfig.data, password: e.target.value } })}
+                                    />
+                                </div>
+                            )}
+                            {modalConfig.type === 'create_user' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <label style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Initial Role</label>
+                                    <select
+                                        value={modalConfig.data.roleId || ''}
+                                        onChange={e => setModalConfig({ ...modalConfig, data: { ...modalConfig.data, roleId: parseInt(e.target.value) } })}
+                                    >
+                                        {roles.map(r => <option key={r.roleId} value={r.roleId}>{r.roleName}</option>)}
+                                    </select>
+                                </div>
+                            )}
                         </>
                     )}
 

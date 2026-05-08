@@ -1,26 +1,21 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { authService } from '../services/api';
 import { Package, LayoutDashboard, Database, Settings, LogOut, Sun, Moon } from 'lucide-react';
-import { jwtDecode } from 'jwt-decode';
 import { useTheme } from '../context/ThemeContext';
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { theme, toggleTheme } = useTheme();
-    const token = authService.getToken();
-    const user = token ? jwtDecode(token) : null;
-    const isAdmin = user?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] === 'Admin';
 
     const handleLogout = () => {
-        authService.logout();
         navigate('/');
     };
 
     const navItems = [
         { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
         { path: '/inventory', label: 'Inventory', icon: <Database size={18} /> },
+        { path: '/management', label: 'Management', icon: <Settings size={18} /> },
     ];
 
     return (
@@ -106,24 +101,7 @@ const Sidebar = () => {
                     </div>
                 </div>
 
-                {isAdmin && (
-                    <button
-                        onClick={() => navigate('/management')}
-                        style={{
-                            color: location.pathname === '/management' ? 'var(--primary)' : 'var(--text-muted)',
-                            background: location.pathname === '/management' ? 'rgba(99, 102, 241, 0.1)' : 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            padding: '10px 12px',
-                            borderRadius: '10px',
-                            width: '100%'
-                        }}
-                    >
-                        <Settings size={18} /> <span style={{ fontWeight: '600' }}>Management</span>
-                    </button>
-                )}
-                <button
+                                <button
                     onClick={handleLogout}
                     style={{
                         color: 'var(--danger)',

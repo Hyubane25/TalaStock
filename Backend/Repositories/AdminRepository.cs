@@ -9,8 +9,12 @@ namespace TalaStock.Backend.Repositories
         // User Management
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<bool> CreateUserAsync(User user, string password);
+        Task<bool> UpdateUserAsync(int userId, string username, string email);
         Task<bool> UpdateUserRoleAsync(int userId, int roleId);
         Task<bool> DeleteUserAsync(int userId);
+        Task<bool> CanDeleteUserAsync(int userId);
+        Task<bool> IsUsernameExistsAsync(string username, int? excludeUserId = null);
+        Task<bool> IsEmailExistsAsync(string email, int? excludeUserId = null);
         
         // Role Management
         Task<IEnumerable<Role>> GetAllRolesAsync();
@@ -67,11 +71,23 @@ namespace TalaStock.Backend.Repositories
             return await ExecuteAsync(async command =>
             {
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-                command.CommandText = "INSERT INTO Users (Username, PasswordHash, Email, RoleId) VALUES (@User, @Pass, @Email, @Role)";
-                AddParameter(command, "@User", user.Username);
-                AddParameter(command, "@Pass", passwordHash);
+                command.CommandText = "INSERT INTO Users (Username, PasswordHash, Email, RoleId) VALUES (@Username, @PasswordHash, @Email, @RoleId)";
+                AddParameter(command, "@Username", user.Username);
+                AddParameter(command, "@PasswordHash", passwordHash);
                 AddParameter(command, "@Email", user.Email);
-                AddParameter(command, "@Role", user.RoleId);
+                AddParameter(command, "@RoleId", user.RoleId);
+                return command.ExecuteNonQuery() > 0;
+            });
+        }
+
+        public async Task<bool> UpdateUserAsync(int userId, string username, string email)
+        {
+            return await ExecuteAsync(async command =>
+            {
+                command.CommandText = "UPDATE Users SET Username = @Username, Email = @Email WHERE UserId = @UserId";
+                AddParameter(command, "@Username", username);
+                AddParameter(command, "@Email", email);
+                AddParameter(command, "@UserId", userId);
                 return command.ExecuteNonQuery() > 0;
             });
         }
@@ -94,6 +110,70 @@ namespace TalaStock.Backend.Repositories
                 command.CommandText = "DELETE FROM Users WHERE UserId = @UserId";
                 AddParameter(command, "@UserId", userId);
                 return command.ExecuteNonQuery() > 0;
+            });
+        }
+
+        public async Task<bool> CanDeleteUserAsync(int userId)
+        {
+            return await ExecuteAsync(async command =>
+            {
+                // Check if user is the last admin
+                command.CommandText = @"
+                    SELECT COUNT(*) FROM Users u 
+                    JOIN Roles r ON u.RoleId = r.RoleId 
+                    WHERE r.RoleName = 'Admin'";
+                var adminCount = Convert.ToInt32(command.ExecuteScalar());
+                
+                command.Parameters.Clear();
+                command.CommandText = "SELECT COUNT(*) FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE u.UserId = @UserId AND r.RoleName = 'Admin'";
+                AddParameter(command, "@UserId", userId);
+                var isUserAdmin = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                
+                // If user is admin and it's the last admin, cannot delete
+                if (isUserAdmin && adminCount <= 1)
+                {
+                    return false;
+                }
+                
+                return true;
+            });
+        }
+
+        public async Task<bool> IsUsernameExistsAsync(string username, int? excludeUserId = null)
+        {
+            return await ExecuteAsync(async command =>
+            {
+                if (excludeUserId.HasValue)
+                {
+                    command.CommandText = "SELECT COUNT(*) FROM Users WHERE Username = @Username AND UserId != @ExcludeUserId";
+                    AddParameter(command, "@ExcludeUserId", excludeUserId.Value);
+                }
+                else
+                {
+                    command.CommandText = "SELECT COUNT(*) FROM Users WHERE Username = @Username";
+                }
+                AddParameter(command, "@Username", username);
+                var count = Convert.ToInt32(command.ExecuteScalar());
+                return count > 0;
+            });
+        }
+
+        public async Task<bool> IsEmailExistsAsync(string email, int? excludeUserId = null)
+        {
+            return await ExecuteAsync(async command =>
+            {
+                if (excludeUserId.HasValue)
+                {
+                    command.CommandText = "SELECT COUNT(*) FROM Users WHERE Email = @Email AND UserId != @ExcludeUserId";
+                    AddParameter(command, "@ExcludeUserId", excludeUserId.Value);
+                }
+                else
+                {
+                    command.CommandText = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
+                }
+                AddParameter(command, "@Email", email);
+                var count = Convert.ToInt32(command.ExecuteScalar());
+                return count > 0;
             });
         }
 

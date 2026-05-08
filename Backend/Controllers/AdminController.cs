@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TalaStock.Backend.Models;
 using TalaStock.Backend.Repositories;
@@ -7,7 +6,6 @@ namespace TalaStock.Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _adminRepository;
@@ -23,6 +21,18 @@ namespace TalaStock.Backend.Controllers
         [HttpPost("users")]
         public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
         {
+            // Validate for duplicate username
+            if (await _adminRepository.IsUsernameExistsAsync(request.Username))
+            {
+                return BadRequest(new { message = "Username already exists" });
+            }
+
+            // Validate for duplicate email
+            if (await _adminRepository.IsEmailExistsAsync(request.Email))
+            {
+                return BadRequest(new { message = "Email already exists" });
+            }
+
             var user = new User { Username = request.Username, Email = request.Email, RoleId = request.RoleId };
             var success = await _adminRepository.CreateUserAsync(user, request.Password);
             return success ? Ok() : BadRequest();
@@ -34,6 +44,31 @@ namespace TalaStock.Backend.Controllers
             public string Email { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
             public int RoleId { get; set; }
+        }
+
+        [HttpPut("users/{userId}")]
+        public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateRequest request)
+        {
+            // Validate for duplicate username (excluding current user)
+            if (await _adminRepository.IsUsernameExistsAsync(request.Username, userId))
+            {
+                return BadRequest(new { message = "Username already exists" });
+            }
+
+            // Validate for duplicate email (excluding current user)
+            if (await _adminRepository.IsEmailExistsAsync(request.Email, userId))
+            {
+                return BadRequest(new { message = "Email already exists" });
+            }
+
+            var success = await _adminRepository.UpdateUserAsync(userId, request.Username, request.Email);
+            return success ? NoContent() : NotFound();
+        }
+
+        public class UserUpdateRequest
+        {
+            public string Username { get; set; } = string.Empty;
+            public string Email { get; set; } = string.Empty;
         }
 
         [HttpPut("users/{userId}/role")]
@@ -51,6 +86,12 @@ namespace TalaStock.Backend.Controllers
         [HttpDelete("users/{userId}")]
         public async Task<IActionResult> DeleteUser(int userId)
         {
+            // Check if user can be safely deleted
+            if (!await _adminRepository.CanDeleteUserAsync(userId))
+            {
+                return BadRequest(new { message = "Cannot delete this user. This might be the last admin user." });
+            }
+
             var success = await _adminRepository.DeleteUserAsync(userId);
             return success ? NoContent() : NotFound();
         }

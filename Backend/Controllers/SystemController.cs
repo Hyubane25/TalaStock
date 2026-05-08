@@ -24,5 +24,11 @@ namespace TalaStock.Backend.Controllers
 
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategories() => Ok(await _adminRepository.GetAllCategoriesAsync());
+
+        [HttpGet("analytics")]
+        public async Task<IActionResult> GetAnalytics([FromQuery] string period = "30d")
+        {
+            return Ok(await _adminRepository.GetAnalyticsAsync(period));
+        }
     }
 }

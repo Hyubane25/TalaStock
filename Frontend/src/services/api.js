@@ -1,16 +1,11 @@
 const BASE_URL = 'http://localhost:5223/api'; // Adjust port if needed
 
-// Helper function to make fetch requests with auth token
+// Helper function to make fetch requests without auth token
 async function apiRequest(endpoint, options = {}) {
-  const token = localStorage.getItem('token');
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers,
   };
-
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
 
   const config = {
     ...options,
@@ -18,12 +13,6 @@ async function apiRequest(endpoint, options = {}) {
   };
 
   const response = await fetch(`${BASE_URL}${endpoint}`, config);
-
-  // Handle 401 unauthorized
-  if (response.status === 401) {
-    localStorage.removeItem('token');
-    window.location.href = '/';
-  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -40,9 +29,6 @@ export const authService = {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-    }
     return data;
   },
   register: async (userData) => {
@@ -52,9 +38,9 @@ export const authService = {
     });
   },
   logout: () => {
-    localStorage.removeItem('token');
+    // No-op since we don't use authentication
   },
-  getToken: () => localStorage.getItem('token'),
+  getToken: () => null,
 };
 
 export const itemService = {
@@ -85,8 +71,12 @@ export const adminService = {
   getUsers: async () => await apiRequest('/admin/users', { method: 'GET' }),
   createUser: async (user) => await apiRequest('/admin/users', {
     method: 'POST',
-      body: JSON.stringify(user),
-    }),
+    body: JSON.stringify(user),
+  }),
+  updateUser: async (userId, user) => await apiRequest(`/admin/users/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(user),
+  }),
   updateUserRole: async (userId, roleId) => await apiRequest(`/admin/users/${userId}/role`, {
     method: 'PUT',
     body: JSON.stringify({ roleId }),
@@ -122,4 +112,5 @@ export const adminService = {
 export const systemService = {
   getDefaultCurrency: async () => await apiRequest('/system/currency/default', { method: 'GET' }),
   getCategories: async () => await apiRequest('/system/categories', { method: 'GET' }),
+  getAnalytics: async (period) => await apiRequest(`/system/analytics?period=${period}`, { method: 'GET' }),
 };
